@@ -78,8 +78,11 @@
   通过上述方法生成的数据是初始值0，之后需要自己通过sql查询数据，进行替换
   ###sql示例
 ####mapper.java
+
     List<EchartsMap> selectUserByOneWeek(ChartscpResult chartscpResult);
+    
  ####mapper.xml
+ 
        <select id="selectUserByOneWeek" resultType="util.ChartscpMap">    
             select DATE_FORMAT(create_time,#{resultDateFormat}) as xcell ,count(*) as data1 FROM user
             where create_time BETWEEN #{startTime} and #{endTime}
@@ -87,6 +90,7 @@
       </select>
  
 #####以10分钟为单位的统计数据sql示例
+
      <select id="selectUserByOneWeek" resultType="util.ChartscpMap">    
                 SELECT DATE_FORMAT(time,#{resultDateFormat}) as xcell ,count(*) as data1
                 FROM
