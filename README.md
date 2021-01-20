@@ -4,7 +4,8 @@
  
  本工具可以通过指定参数生成图表曲线图,柱状图的初始数据，配合sql实现展示数据
  
- ###使用格式
+ ### 使用格式
+ 
  	ChartscpResult build = new ChartscpUtils.Builder(Calendar.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").setLength(7).setInterval(8).build();
 	
 	参数说明：
