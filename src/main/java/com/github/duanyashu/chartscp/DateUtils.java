@@ -1,7 +1,6 @@
 package com.github.duanyashu.chartscp;
 
 
-import java.beans.PropertyEditorSupport;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -9,14 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
-/**
- * 类描述：时间操作定义类
- *
- * @Author: 张代浩
- * @Date:2012-12-8 12:15:03
- * @Version 1.0
- */
-public class DateUtils extends PropertyEditorSupport {
+public class DateUtils {
 
     public static final String NORM_DATE_PATTERN = "yyyy-MM-dd";
 
