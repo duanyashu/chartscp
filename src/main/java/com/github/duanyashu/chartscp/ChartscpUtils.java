@@ -1,6 +1,8 @@
 package com.github.duanyashu.chartscp;
 
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -195,24 +197,24 @@ public class ChartscpUtils<T> {
     private <T> ChartscpResult createChartscpResult(Class<T> chartscpResultSub, List<String> dates, List<Integer> counts, Date startTime, Date endTime) {
         try {
             ChartscpResult chartscpResult;
-            if (chartscpResultSub !=ChartscpResult.class){
+            if (chartscpResultSub ==ChartscpResult.class){
+                chartscpResult = new ChartscpResult();
+            }else {
                 chartscpResult= (ChartscpResult) chartscpResultSub.newInstance();
-                chartscpResult.setxCells(dates);
-                chartscpResult.setDatas(counts);
-                chartscpResult.setStartTime(startTime);
-                chartscpResult.setEndTime(endTime);
-                chartscpResult.setInterval(interval);
                 Method[] methods = chartscpResultSub.getDeclaredMethods ();
                 for (Method method : methods){
                     if (method.getName().contains("set")){
                         method.invoke(chartscpResult,new ArrayList<>(counts));
                     }
                 }
-            }else {
-                chartscpResult = new ChartscpResult(dates, counts, startTime, endTime, interval);
             }
+            chartscpResult.setxCells(dates);
+            chartscpResult.setDatas(counts);
+            chartscpResult.setStartTime(startTime);
+            chartscpResult.setEndTime(endTime);
+            chartscpResult.setInterval(interval);
             return chartscpResult;
-        }catch (Exception e){
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return new ChartscpResult();

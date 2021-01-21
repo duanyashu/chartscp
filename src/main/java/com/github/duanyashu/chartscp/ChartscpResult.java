@@ -25,6 +25,12 @@ public class ChartscpResult<T> {
      */
     private List<T> datas;
 
+
+    /**
+     * 图例
+     */
+    private List<T> legend;
+
     private Date startTime;
 
     private Date endTime;
@@ -75,6 +81,14 @@ public class ChartscpResult<T> {
 
     public void setDatas(List<T> datas) {
         this.datas = datas;
+    }
+
+    public List<T> getLegend() {
+        return legend;
+    }
+
+    public void setLegend(List<T> legend) {
+        this.legend = legend;
     }
 
     public Date getStartTime() {
@@ -129,29 +143,82 @@ public class ChartscpResult<T> {
      * 更新数据
      * @param list
      */
-    public void updateData(List<? extends ChartscpMap> list) throws Exception {
+    public void updateData(List<? extends ChartscpMap> list){
         for (ChartscpMap chartscpMap : list) {
-            int index = xCells.indexOf(chartscpMap.getXcell());
-            if (index!=-1){
-                Integer data = chartscpMap.getData();
-                if (null!=data){
-                    datas.set(index, (T) data);
-                }
-                Field[] declaredFields = this.getClass().getDeclaredFields();
-                for (Field declaredField : declaredFields) {
-                    if (declaredField.getType() ==List.class){
+            if (this.interval==0){
+                setAtWillData(chartscpMap);
+            }else{
+                setContinuityData(chartscpMap);
+            }
+        }
+    }
+
+    /**
+     * 设置时间连续数据
+     * @param chartscpMap
+     * @throws NoSuchMethodException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    private void setContinuityData(ChartscpMap chartscpMap){
+        int index = xCells.indexOf(chartscpMap.getXcell());
+        if (index!=-1){
+            Integer data = chartscpMap.getData();
+            if (null!=data){
+                datas.set(index, (T) data);
+            }
+            if (chartscpMap.getClass() == ChartscpMap.class){
+                return;
+            }
+            Field[] declaredFields = this.getClass().getDeclaredFields();
+            for (Field declaredField : declaredFields) {
+                if (declaredField.getType() ==List.class){
+                    try {
                         Method thisGet = this.getClass().getMethod("get" + getMethodName(declaredField.getName()));
                         List datasx = (List) thisGet.invoke(this);
                         Method get = chartscpMap.getClass().getMethod("get" + getMethodName(declaredField.getName()));
                         Object invoke = get.invoke(chartscpMap);
                         datasx.set(index,invoke);
+                    } catch (IllegalAccessException | InvocationTargetException| NoSuchMethodException e) {
+                        e.printStackTrace();
                     }
                 }
             }
         }
     }
 
-    // 把一个字符串的第一个字母大写、效率是最高的、
+    /**
+     * 设置不连续数据
+     * @param chartscpMap
+     */
+    private void setAtWillData(ChartscpMap chartscpMap){
+        xCells.add((T) chartscpMap.getXcell());
+        datas.add((T) chartscpMap.getData());
+        if (chartscpMap.getClass() == ChartscpMap.class){
+            return;
+        }
+        Field[] declaredFields = this.getClass().getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            if (declaredField.getType() ==List.class){
+                try {
+                    Method thisGet = this.getClass().getMethod("get" + getMethodName(declaredField.getName()));
+                    List datasx = (List) thisGet.invoke(this);
+                    Method get = chartscpMap.getClass().getMethod("get" + getMethodName(declaredField.getName()));
+                    Object invoke = get.invoke(chartscpMap);
+                    datasx.add(invoke);
+                } catch (IllegalAccessException | InvocationTargetException| NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 把字符串的第一个字母大写、效率是最高的
+     * @param fildeName
+     * @return
+     */
     private static String getMethodName(String fildeName){
         byte[] items = fildeName.getBytes();
         items[0] = (byte) ((char) items[0] - 'a' + 'A');
