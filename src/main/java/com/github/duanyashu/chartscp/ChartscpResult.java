@@ -3,7 +3,7 @@ package com.github.duanyashu.chartscp;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -46,6 +46,11 @@ public class ChartscpResult<T> {
     private String  groupByDateFormat;
 
     /**
+     * 数据是否不能为0（eg:价格 没有变化显示原价）
+     */
+    private  boolean dataNonzero;
+
+    /**
      * 时间间隔
      */
     private int  interval;
@@ -59,9 +64,10 @@ public class ChartscpResult<T> {
     public ChartscpResult() {
     }
 
-    public ChartscpResult(List<T> xCells, List<T> datas, Date startTime, Date endTime, int interval) {
+    public ChartscpResult(List<T> xCells, List<T> datas, List<T> legend, Date startTime, Date endTime, int interval) {
         this.xCells = xCells;
         this.datas = datas;
+        this.legend=legend;
         this.startTime = startTime;
         this.endTime = endTime;
         this.interval = interval;
@@ -139,75 +145,98 @@ public class ChartscpResult<T> {
         this.where = where;
     }
 
+    public void setDataNonzero(boolean dataNonzero) {
+        this.dataNonzero = dataNonzero;
+    }
+
     /**
      * 更新数据
      * @param list
      */
     public void updateData(List<? extends ChartscpMap> list){
-        for (ChartscpMap chartscpMap : list) {
-            if (this.interval==0){
-                setAtWillData(chartscpMap);
-            }else{
-                setContinuityData(chartscpMap);
-            }
+        if (this.interval==0){
+            setAtWillData( list);
+        }else{
+            setContinuityData(list);
         }
     }
 
     /**
      * 设置时间连续数据
-     * @param chartscpMap
+     * @param list
      * @throws NoSuchMethodException
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    private void setContinuityData(ChartscpMap chartscpMap){
-        int index = xCells.indexOf(chartscpMap.getXcell());
-        if (index!=-1){
-            Integer data = chartscpMap.getData();
-            if (null!=data){
-                datas.set(index, (T) data);
-            }
-            if (chartscpMap.getClass() == ChartscpMap.class){
-                return;
-            }
-            Field[] declaredFields = this.getClass().getDeclaredFields();
-            for (Field declaredField : declaredFields) {
-                if (declaredField.getType() ==List.class){
-                    try {
-                        Method thisGet = this.getClass().getMethod("get" + getMethodName(declaredField.getName()));
-                        List datasx = (List) thisGet.invoke(this);
-                        Method get = chartscpMap.getClass().getMethod("get" + getMethodName(declaredField.getName()));
-                        Object invoke = get.invoke(chartscpMap);
-                        datasx.set(index,invoke);
-                    } catch (IllegalAccessException | InvocationTargetException| NoSuchMethodException e) {
-                        e.printStackTrace();
+    private void setContinuityData(List<? extends ChartscpMap> list){
+        boolean first=true;
+        for (ChartscpMap chartscpMap : list) {
+            int index = xCells.indexOf(chartscpMap.getXcell());
+            if (index!=-1) {
+                Integer data = chartscpMap.getData();
+                if (setData(index, datas, data, first)){
+                    //如果是首次 删除超出查询范围的x轴数据
+                    xCells.remove(0);
+                }
+                if (chartscpMap.getClass() != ChartscpMap.class) {
+                    //获取当前类的扩展类中的属性方法
+                    Field[] declaredFields = this.getClass().getDeclaredFields();
+                    for (Field declaredField : declaredFields) {
+                        if (declaredField.getType() == List.class) {
+                            try {
+                                Method thisGet = this.getClass().getMethod("get" + getMethodName(declaredField.getName()));
+                                List datasx = (List) thisGet.invoke(this);
+                                Method get = chartscpMap.getClass().getMethod("get" + getMethodName(declaredField.getName()));
+                                Object invoke = get.invoke(chartscpMap);
+                                setData(index, datasx, invoke,first);
+                            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 }
+                first = false;
             }
         }
     }
 
+    private boolean setData(int index, List datas, Object data,boolean first) {
+        if (null!= data){
+            int totalSize = dataNonzero? datas.size()-1:index;
+            for (int i = index; i <=totalSize; i++) {
+                datas.set(i, data);
+            }
+        }
+        //如果是首次 删除超出查询范围的数据
+        if (first && dataNonzero){
+            datas.remove(0);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 设置不连续数据
-     * @param chartscpMap
+     * @param list
      */
-    private void setAtWillData(ChartscpMap chartscpMap){
-        xCells.add((T) chartscpMap.getXcell());
-        datas.add((T) chartscpMap.getData());
-        if (chartscpMap.getClass() == ChartscpMap.class){
-            return;
-        }
-        Field[] declaredFields = this.getClass().getDeclaredFields();
-        for (Field declaredField : declaredFields) {
-            if (declaredField.getType() ==List.class){
-                try {
-                    Method thisGet = this.getClass().getMethod("get" + getMethodName(declaredField.getName()));
-                    List datasx = (List) thisGet.invoke(this);
-                    Method get = chartscpMap.getClass().getMethod("get" + getMethodName(declaredField.getName()));
-                    Object invoke = get.invoke(chartscpMap);
-                    datasx.add(invoke);
-                } catch (IllegalAccessException | InvocationTargetException| NoSuchMethodException e) {
-                    e.printStackTrace();
+    private void setAtWillData(List<? extends ChartscpMap> list){
+        for (ChartscpMap chartscpMap : list) {
+            xCells.add((T) chartscpMap.getXcell());
+            datas.add((T) chartscpMap.getData());
+            if (chartscpMap.getClass() != ChartscpMap.class) {
+                Field[] declaredFields = this.getClass().getDeclaredFields();
+                for (Field declaredField : declaredFields) {
+                    if (declaredField.getType() == List.class) {
+                        try {
+                            Method thisGet = this.getClass().getMethod("get" + getMethodName(declaredField.getName()));
+                            List datasx = (List) thisGet.invoke(this);
+                            Method get = chartscpMap.getClass().getMethod("get" + getMethodName(declaredField.getName()));
+                            Object invoke = get.invoke(chartscpMap);
+                            datasx.add(invoke);
+                        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
         }

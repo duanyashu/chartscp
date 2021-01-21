@@ -42,6 +42,10 @@ public class ChartscpUtils<T> {
 
         private int interval;
 
+        private  boolean dataNonzero;
+
+        private String xCellFormat;
+
 
     //构造方法
     private ChartscpUtils() {
@@ -54,6 +58,8 @@ public class ChartscpUtils<T> {
         this.endTime = builder.endTime;
         this.length = builder.length;
         this.interval = builder.interval;
+        this.dataNonzero= builder.dataNonzero;
+        this.xCellFormat=builder.xCellFormat;
 
     }
 
@@ -72,7 +78,12 @@ public class ChartscpUtils<T> {
 
         private int interval = 1;
 
+        private  boolean dataNonzero = false;
+
+        private  String xCellFormat;
+
         private Class <? extends ChartscpResult>  chartscpResultSub = ChartscpResult.class;
+
         //构造方法
         private Builder() {
 
@@ -119,6 +130,25 @@ public class ChartscpUtils<T> {
             this.interval = interval;
             return this;
         }
+
+        /**
+         * x轴数据格式化
+         * @param xCellFormat
+         * @return
+         */
+        public Builder setXCellFormat(String xCellFormat) {
+            this.xCellFormat = xCellFormat;
+            return this;
+        }
+        /**
+         * 数据是否不能为0（eg:价格 没有变化显示原价）
+         * @param dataNonzero
+         * @return
+         */
+        public Builder setDataNonzero (boolean dataNonzero) {
+            this.dataNonzero = dataNonzero;
+            return this;
+        }
         //构建结果集对象
         public <T> T build(Class<T> chartscpResultSub) {
             return (T) new ChartscpUtils(this).generatorInitData(chartscpResultSub);
@@ -162,6 +192,10 @@ public class ChartscpUtils<T> {
             //计算遍历次数 如果没有有结束日期 需要长度/间隔
             int iterationLength = endTime==null? length: interval==0? length:length/interval;
             length = interval==0? iterationLength : interval==1 || endTime!= null ? iterationLength* interval: iterationLength* interval-1;
+            if (dataNonzero){
+                iterationLength++;
+                length++;
+            }
             calendar.add(calendarField,-length);
             Date startTime = calendar.getTime();
             if (interval>0){
@@ -213,6 +247,7 @@ public class ChartscpUtils<T> {
             chartscpResult.setStartTime(startTime);
             chartscpResult.setEndTime(endTime);
             chartscpResult.setInterval(interval);
+            chartscpResult.setDataNonzero(dataNonzero);
             return chartscpResult;
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
             e.printStackTrace();
@@ -221,7 +256,13 @@ public class ChartscpUtils<T> {
     }
 
 
-    private static String getFormat(int field) {
+    private String getFormat(int field) {
+        if (!"".equals(xCellFormat)&& null!=xCellFormat){
+            if (DateUtils.EN_DATE_PATTERN.contains(xCellFormat)||DateUtils.CN_DATE_PATTERN.contains(xCellFormat)
+                    ||DateUtils.NORM_DATETIME_PATTERN.contains(xCellFormat)|| DateUtils.SPECIAL_SIMPLE_DATE_PATTERN.contains(xCellFormat)){
+                return  xCellFormat;
+            }
+        }
         String format;
         switch (field){
             case Calendar.MINUTE:

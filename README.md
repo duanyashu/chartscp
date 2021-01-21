@@ -6,10 +6,10 @@
  
  ### 使用格式
  
- 	ChartscpResult build = new ChartscpUtils.Builder(Calendar.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").setLength(7).setInterval(8).build();
+ 	ChartscpResult build = new ChartscpUtils.Builder(Calendar.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").setLength(7).setInterval(8).setDataNonzero(true).setXCellFormat("HH时").build();
 	
 	参数说明：
-		Builder(Calendar.HOUR)是指定显示x轴格式对应年，月，日，小时，分钟
+		Builder(Calendar.HOUR)是指定显示x轴格式对应年，月，日，小时，分钟 必填
 	
 		setLength() 是指定显示的长度 默认是7 
 			eg: Builder(Calendar.YEAR).setLength(3) 是显示最近3年 xCells=[2019,2020,2021] ）
@@ -18,7 +18,11 @@
 	
 		setInterval() 是指定日期步长 默认是1，如果设置为 0 代表日期不需要连续,按数据库查询显示。		
 			(eg:Builder(Calendar.YEAR).setLength(3).setInterval(2) 显示最近6年每两年作为一个单位 xCells=[2017,2019,2021])
-	
+			
+	    setDataNonzero(true) 设置数据为0是否显示前一个值(eg: 显示价格变化) 默认是 false
+	    
+	    setXCellFormat("HH时")  指定 显示的xCell日期格式 不设置显示默认格式
+		
 		build() 方法生成结果对象ChartscpResult 如果需要多个datas，可以通过自定义继承ChartscpResult，在build(扩展类)中传入实现。
 			eg:扩展类
 				public class Kz extends ChartscpResult {
