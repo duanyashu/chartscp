@@ -29,6 +29,7 @@ public class DateUtils {
     public static final String CN_DATE_MONTH_PATTERN = "yyyy年MM月";
     public static final String CN_DATETIME_MINUTE_PATTERN = "yyyy年MM月dd日 HH:mm";
     public static final String CN_DATETIME_PATTERN = "yyyy年MM月dd日 HH:mm:ss";
+    public static final String CN_DATETIME_PATTERN1 = "yyyy年MM月dd日HH时mm分ss秒";
 
     public static final String SIMPLE_DATE_MONTH_PATTERN = "yyyy-MM";
     public static final String SIMPLE_DATE_DAY_PATTERN = "MM-dd";

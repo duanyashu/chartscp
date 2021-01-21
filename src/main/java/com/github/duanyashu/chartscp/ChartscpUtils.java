@@ -214,6 +214,7 @@ public class ChartscpUtils<T> {
             }
             Date endTime = calendar.getTime();
             ChartscpResult  chartscpResult = createChartscpResult(chartscpResultSub, dates, counts, startTime, endTime);
+            chartscpResult.setResultDateFormat(javaDateFormatToMysqlDateFormat(format));
             format(calendarField, chartscpResult);
             return (T) chartscpResult;
     }
@@ -258,7 +259,7 @@ public class ChartscpUtils<T> {
 
     private String getFormat(int field) {
         if (!"".equals(xCellFormat)&& null!=xCellFormat){
-            if (DateUtils.EN_DATE_PATTERN.contains(xCellFormat)||DateUtils.CN_DATE_PATTERN.contains(xCellFormat)
+            if (DateUtils.EN_DATE_PATTERN.contains(xCellFormat)||DateUtils.CN_DATE_PATTERN.contains(xCellFormat)||DateUtils.CN_DATETIME_PATTERN1.contains(xCellFormat)
                     ||DateUtils.NORM_DATETIME_PATTERN.contains(xCellFormat)|| DateUtils.SPECIAL_SIMPLE_DATE_PATTERN.contains(xCellFormat)){
                 return  xCellFormat;
             }
@@ -297,7 +298,6 @@ public class ChartscpUtils<T> {
                 chartscpResult.setStartTime(startCalender.getTime());
                 endCalender.set(Calendar.SECOND,59);
                 chartscpResult.setEndTime(endCalender.getTime());
-                chartscpResult.setResultDateFormat("%H-%i");
                 chartscpResult.setGroupByDateFormat("%Y-%m-%d %H:%i");
                 break;
             case Calendar.HOUR:
@@ -307,7 +307,6 @@ public class ChartscpUtils<T> {
                 endCalender.set(Calendar.MINUTE,59);
                 endCalender.set(Calendar.SECOND,59);
                 chartscpResult.setEndTime(endCalender.getTime());
-                chartscpResult.setResultDateFormat("%H");
                 chartscpResult.setGroupByDateFormat("%Y-%m-%d %H");
                 break;
             case Calendar.DATE:
@@ -315,7 +314,6 @@ public class ChartscpUtils<T> {
                 endCalender.set(endCalender.get(Calendar.YEAR),endCalender.get(Calendar.MONTH),endCalender.get(Calendar.DATE),23,59,59);
                 chartscpResult.setStartTime(startCalender.getTime());
                 chartscpResult.setEndTime(endCalender.getTime());
-                chartscpResult.setResultDateFormat("%m-%d");
                 chartscpResult.setGroupByDateFormat("%Y-%m-%d");
                 break;
             case Calendar.MONTH:
@@ -324,7 +322,6 @@ public class ChartscpUtils<T> {
                 endCalender.set(endCalender.get(Calendar.YEAR),endCalender.get(Calendar.MONTH),dayOfMonth,23,59,59);
                 chartscpResult.setStartTime(startCalender.getTime());
                 chartscpResult.setEndTime(endCalender.getTime());
-                chartscpResult.setResultDateFormat("%m");
                 chartscpResult.setGroupByDateFormat("%Y-%m");
                 break;
             case Calendar.YEAR:
@@ -332,11 +329,16 @@ public class ChartscpUtils<T> {
                 chartscpResult.setStartTime(startCalender.getTime());
                 endCalender.set(endCalender.get(Calendar.YEAR),11,31,23,59,59);
                 chartscpResult.setEndTime(endCalender.getTime());
-                chartscpResult.setResultDateFormat("%Y");
                 chartscpResult.setGroupByDateFormat("%Y");
                 break;
             default:
                 break;
         }
+    }
+
+    private String javaDateFormatToMysqlDateFormat(String javaFormat){
+        return    javaFormat.replace("yyyy","%Y").replace("MM","%m")
+                .replace("dd","%d").replace("HH","%H")
+                .replace("mm","%i").replace("ss","%s");
     }
 }
