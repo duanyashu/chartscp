@@ -31,7 +31,7 @@
 					}
 				}
 			引入使用
-			 Kz kz = new Builder(Calendar.DATE).build(Kz.class);
+			 Kz kz = new ChartscpUtils.Builder(Calendar.DATE).build(Kz.class);
 	  
   
   常用示例：
@@ -126,6 +126,11 @@
           </select>
       
 >返回结果集是ChartscpMap对象， 这个对象中有两个参数 xcell 对应日期，data对应数据 如果有多个data可以通过扩展ChartscpMap实现
+    
+     public class ChartscpMapKz extends ChartscpMap {
+     
+         private Integer datas1;
+     }
 
 ### 最后更新数据
     ChartscpResult中有一个updateData方法可以实现数据更新
