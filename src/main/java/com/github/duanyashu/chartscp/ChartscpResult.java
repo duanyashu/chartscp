@@ -177,6 +177,7 @@ public class ChartscpResult<T> {
                 if (setData(index, datas, data, first)){
                     //如果是首次 删除超出查询范围的x轴数据
                     xCells.remove(0);
+                    recoveryStartTime();
                 }
                 if (chartscpMap.getClass() != ChartscpMap.class) {
                     //获取当前类的扩展类中的属性方法
@@ -199,6 +200,27 @@ public class ChartscpResult<T> {
             }
         }
     }
+
+    /**
+     * 还原原始开始日期
+     */
+    private void recoveryStartTime() {
+        Calendar calendar = DateUtils.getCalendar(startTime.getTime());
+        Calendar endCalendar = DateUtils.getCalendar(endTime.getTime());
+        if (calendar.get(Calendar.MINUTE)!=0){
+            calendar.add(Calendar.MINUTE,+1);
+        }else if (calendar.get(Calendar.HOUR)!=0){
+            calendar.add(Calendar.HOUR,+1);
+        }else if (calendar.get(Calendar.MONTH)==endCalendar.get(Calendar.MONTH)&&calendar.get(Calendar.DATE)!=endCalendar.get(Calendar.DATE)){
+            calendar.add(Calendar.DATE,+1);
+        }else if(calendar.get(Calendar.YEAR)==endCalendar.get(Calendar.YEAR)&&calendar.get(Calendar.MONTH)!=endCalendar.get(Calendar.MONTH)){
+            calendar.add(Calendar.MONTH,1);
+        }else if(calendar.get(Calendar.YEAR)!=endCalendar.get(Calendar.YEAR)){
+            calendar.add(Calendar.YEAR,1);
+        }
+        startTime=calendar.getTime();
+    }
+
 
     private boolean setData(int index, List datas, Object data,boolean first) {
         if (null!= data){
