@@ -3,9 +3,7 @@ package com.github.duanyashu.chartscp;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @description: 数据结果集
@@ -14,6 +12,7 @@ import java.util.List;
  */
 
 public class ChartscpResult<T> {
+
 
     /**
      * x轴数据
@@ -45,10 +44,6 @@ public class ChartscpResult<T> {
      */
     private String  groupByDateFormat;
 
-    /**
-     * 数据是否不能为0（eg:价格 没有变化显示原价）
-     */
-    private  boolean dataNonzero;
 
     /**
      * 时间间隔
@@ -60,6 +55,21 @@ public class ChartscpResult<T> {
      */
     private T where;
 
+    /**
+     * 标题
+     */
+    private String  title;
+
+
+
+    /**
+     * 数据是否不能为0（eg:价格 没有变化显示原价）
+     */
+    private  boolean dataNonzero;
+
+    private int calendarField;
+
+    private String xCellFormat;
 
     public ChartscpResult() {
     }
@@ -149,11 +159,28 @@ public class ChartscpResult<T> {
         this.dataNonzero = dataNonzero;
     }
 
+    public void setCalendarField(int calendarField) {
+        this.calendarField = calendarField;
+    }
+
+    public void setxCellFormat(String xCellFormat) {
+        this.xCellFormat = xCellFormat;
+    }
+
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     /**
      * 更新数据
      * @param list
      */
-    public void updateData(List<? extends ChartscpMap> list){
+    public void updateData(List<? extends ChartscpResultMap> list){
         if (this.interval==0){
             setAtWillData( list);
         }else{
@@ -168,18 +195,16 @@ public class ChartscpResult<T> {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    private void setContinuityData(List<? extends ChartscpMap> list){
+    private void setContinuityData(List<? extends ChartscpResultMap> list){
         boolean first=true;
-        for (ChartscpMap chartscpMap : list) {
+        for (ChartscpResultMap chartscpMap : list) {
             int index = xCells.indexOf(chartscpMap.getXcell());
             if (index!=-1) {
                 Integer data = chartscpMap.getData();
                 if (setData(index, datas, data, first)){
-                    //如果是首次 删除超出查询范围的x轴数据
-                    xCells.remove(0);
-                    recoveryStartTime();
+                    trimScopeData();
                 }
-                if (chartscpMap.getClass() != ChartscpMap.class) {
+                if (chartscpMap.getClass() != ChartscpResultMap.class) {
                     //获取当前类的扩展类中的属性方法
                     Field[] declaredFields = this.getClass().getDeclaredFields();
                     for (Field declaredField : declaredFields) {
@@ -199,26 +224,40 @@ public class ChartscpResult<T> {
                 first = false;
             }
         }
+        if (first && dataNonzero){
+            datas.remove(0);
+            trimScopeData();
+        }
+        if (calendarField==ChartscpUtils.WEEK){
+            String xCellsPrefix= xCellFormat==null?"星期":xCellFormat;
+            List<String> strings = Arrays.asList(xCellsPrefix+"一", xCellsPrefix+"二", xCellsPrefix+"三", xCellsPrefix+"四", xCellsPrefix+"五", xCellsPrefix+"六", xCellsPrefix+"日");
+            int a=0;
+            for (int i = 0; i < xCells.size(); i++) {
+                int i1 = a % strings.size();
+                xCells.set(i, (T) strings.get(i1));
+                a+=interval;
+            }
+        }
     }
 
     /**
-     * 还原原始开始日期
+     * 删除辅助数据
      */
-    private void recoveryStartTime() {
+    private void trimScopeData() {
+        //如果是首次 删除超出查询范围的x轴数据
+        xCells.remove(0);
+        //恢复开始日期
         Calendar calendar = DateUtils.getCalendar(startTime.getTime());
-        Calendar endCalendar = DateUtils.getCalendar(endTime.getTime());
-        if (calendar.get(Calendar.MINUTE)!=0){
-            calendar.add(Calendar.MINUTE,+1);
-        }else if (calendar.get(Calendar.HOUR)!=0){
-            calendar.add(Calendar.HOUR,+1);
-        }else if (calendar.get(Calendar.MONTH)==endCalendar.get(Calendar.MONTH)&&calendar.get(Calendar.DATE)!=endCalendar.get(Calendar.DATE)){
-            calendar.add(Calendar.DATE,+1);
-        }else if(calendar.get(Calendar.YEAR)==endCalendar.get(Calendar.YEAR)&&calendar.get(Calendar.MONTH)!=endCalendar.get(Calendar.MONTH)){
-            calendar.add(Calendar.MONTH,1);
-        }else if(calendar.get(Calendar.YEAR)!=endCalendar.get(Calendar.YEAR)){
-            calendar.add(Calendar.YEAR,1);
+        int field = calendarField;
+        if (calendarField == ChartscpUtils.WEEK || calendarField == ChartscpUtils.HOUR_WHOLE_DAY) {
+            field = ChartscpUtils.DATE;
+        } else if (calendarField == ChartscpUtils.DAY_WHOLE_MONTH || calendarField == ChartscpUtils.MONTH_WHOLE_YEAR) {
+            field = ChartscpUtils.MONTH;
+        } else if (calendarField == ChartscpUtils.MINUTE_WHOLE_HOUR) {
+            field = ChartscpUtils.MINUTE;
         }
-        startTime=calendar.getTime();
+        calendar.add(field, +interval);
+        startTime = calendar.getTime();
     }
 
 
@@ -241,11 +280,11 @@ public class ChartscpResult<T> {
      * 设置不连续数据
      * @param list
      */
-    private void setAtWillData(List<? extends ChartscpMap> list){
-        for (ChartscpMap chartscpMap : list) {
+    private void setAtWillData(List<? extends ChartscpResultMap> list){
+        for (ChartscpResultMap chartscpMap : list) {
             xCells.add((T) chartscpMap.getXcell());
             datas.add((T) chartscpMap.getData());
-            if (chartscpMap.getClass() != ChartscpMap.class) {
+            if (chartscpMap.getClass() != ChartscpResultMap.class) {
                 Field[] declaredFields = this.getClass().getDeclaredFields();
                 for (Field declaredField : declaredFields) {
                     if (declaredField.getType() == List.class) {

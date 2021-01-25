@@ -6,13 +6,13 @@
  
  ### 使用格式
  
- 	ChartscpResult build = new ChartscpUtils.Builder(Calendar.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").setLength(7).setInterval(8).setDataNonzero(true).setXCellFormat("HH时").build();
+ 	ChartscpResult build = new ChartscpUtils.Builder(ChartscpUtils.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").setLength(7).setInterval(8).setDataNonzero(true).setXCellFormat("HH时").build();
 	
 	参数说明：
-		Builder(Calendar.HOUR)是指定显示x轴格式对应年，月，日，小时，分钟 必填
+		Builder(ChartscpUtils.HOUR)是指定显示x轴格式，年（YEAR），月(MONTH)，日(DATE)，小时(HOUR)，分钟(MINUTE)，整周(WEEK)，整小时(MINUTE_WHOLE_HOUR)，整天(HOUR_WHOLE_DAY)，整月(DAY_WHOLE_MONTH)，整年(MONTH_WHOLE_YEAR)， 必填
 	
 		setLength() 这个方法用来指定显示的长度 默认是7 
-			eg: Builder(Calendar.YEAR).setLength(3) 是显示最近3年 xCells=[2019,2020,2021] ）
+			eg: Builder(ChartscpUtils.YEAR).setLength(3) 是显示最近3年 xCells=[2019,2020,2021] ）
 	
 		setStartTime() 和 setEndTime() 是指定日期范围，  指定了日期范围 setLength 失效
 	
@@ -41,30 +41,120 @@
   常用示例：
    
         eg : 默认查询7条数据 通过setLength指定   默认数据间隔1 通过setInterval指定
-   
-         //当天三班倒数据
-   
-        ChartscpResult build = new ChartscpUtils.Builder(Calendar.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").setInterval(8).build();
-   
-        //最近7小时数据
-   
-        ChartscpResult build2 = new ChartscpUtils.Builder(Calendar.HOUR).build();
-   
-        //最近7小时非连续数据（只显示数据库有的数据）
-   
-        ChartscpResult build21 = new ChartscpUtils.Builder(Calendar.HOUR).setInterval(0).build();
-   
-        //最近7年
-   
-        ChartscpResult build5 = new ChartscpUtils.Builder(Calendar.YEAR).build();
-   
-        //最近5个月
-   
-        ChartscpResult build4 = new ChartscpUtils.Builder(Calendar.MONTH).setLength(5).build();
-   
-        //最近7天
-   
-        ChartscpResult build4 = new ChartscpUtils.Builder(Calendar.DATE).build();
+
+         * 年为单位 最近3年
+         */
+        ChartscpResult yearResult = new ChartscpUtils.Builder(ChartscpUtils.YEAR).setLength(3).build();
+        /**
+         * 月为单位  最近5月
+         */
+        ChartscpResult monthResult = new ChartscpUtils.Builder(ChartscpUtils.MONTH).setXCellFormat("yy-M").setLength(5).build();
+        /**
+         * 日为单位 最近7日
+         */
+        ChartscpResult dateResult = new ChartscpUtils.Builder(ChartscpUtils.DATE).setLength(7).build();
+        /**
+         * 小时为单位 最近7小时
+         */
+        ChartscpResult hourResult = new ChartscpUtils.Builder(ChartscpUtils.HOUR).build();
+        /**
+         * 分钟为单位 最近7分钟
+         */
+        ChartscpResult minuteResult = new ChartscpUtils.Builder(ChartscpUtils.MINUTE).build();
+
+        /**
+         * 日为单位 间隔2日统计 3个日单位 (eg: xells={1 3 5}))
+         */
+        ChartscpResult dateIntervalResult = new ChartscpUtils.Builder(ChartscpUtils.DATE).setLength(3).setInterval(2).build();
+        /**
+         * 最近7天非连续数据  间隔为0  只生成开始结束日期，数据直接获取数据库
+         */
+        ChartscpResult dateInterval0Result = new ChartscpUtils.Builder(Calendar.DATE).setInterval(0).build();
+        List<ChartscpResultMap> list1 = new ArrayList<>();
+        ChartscpResultMap chartscpResultMap = new ChartscpResultMap();
+        chartscpResultMap.setXcell("01-18");
+        chartscpResultMap.setData(1);
+        list1.add(chartscpResultMap);
+        ChartscpResultMap chartscpResultMap1 = new ChartscpResultMap();
+        chartscpResultMap1.setXcell("01-23");
+        chartscpResultMap1.setData(4);
+        list1.add(chartscpResultMap1);
+        dateInterval0Result.updateData(list1);
+
+        /**
+         * 加开始 ，结束时间  指定日期的数据
+         */
+        ChartscpResult seResult = new ChartscpUtils.Builder(ChartscpUtils.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").build();
+
+        /**
+         * 自定义 显示格式
+         */
+        ChartscpResult customXCellFormat = new ChartscpUtils.Builder(ChartscpUtils.HOUR).setXCellFormat("H点m分").setLength(3).build();
+
+        /**
+         * 自定义扩展类实现字段扩展
+         */
+        Kz kz = new ChartscpUtils.Builder(ChartscpUtils.DATE).build(Kz.class);
+        //模拟数据库数据 ChartscpResultMapKz和Kz类字段对应  datas1
+        List<ChartscpResultMapKz> list = new ArrayList<>();
+        ChartscpResultMapKz sqKz = new ChartscpResultMapKz();
+        sqKz.setXcell("01-22");
+        sqKz.setData(1);
+        sqKz.setDatas1(3);
+        list.add(sqKz);
+        ChartscpResultMapKz sqKz1 = new ChartscpResultMapKz();
+        sqKz1.setXcell("01-24");
+        sqKz1.setData(4);
+        sqKz1.setDatas1(8);
+        list.add(sqKz1);
+        //更新数据
+        kz.updateData(list);
+
+        /**
+         * 按分钟显示整小时
+         */
+        ChartscpResult minute_whole_hour = new ChartscpUtils.Builder(MINUTE_WHOLE_HOUR).setDataNonzero(true).setInterval(8).build();
+        /**
+         * 按分钟显示整小时 ,当前分钟没有数据保持前一分钟数据
+         */
+        ChartscpResult minute_whole_hour1 = new ChartscpUtils.Builder(MINUTE_WHOLE_HOUR).setDataNonzero(true).setEndTime("2021-01-25 08:09:23").build();
+        //模拟数据库数据 ChartscpResultMapKz和Kz类字段对应  datas1
+        List<ChartscpResultMap> list3 = new ArrayList<>();
+        ChartscpResultMap crm1 = new ChartscpResultMap();
+        crm1.setXcell("11:12");
+        crm1.setData(1);
+        list3.add(crm1);
+        //更新数据
+        minute_whole_hour1.updateData(list3);
+        /**
+         * 按小时显示整天  三班倒
+         */
+        ChartscpResult hour_whole_day = new ChartscpUtils.Builder(ChartscpUtils.HOUR_WHOLE_DAY).setInterval(8).setDataNonzero(true).build();
+
+        /**
+         * 按天显示整月
+         */
+        ChartscpResult day_whole_month = new ChartscpUtils.Builder(ChartscpUtils.DAY_WHOLE_MONTH).build();
+        /**
+         * 按月显示整年
+         */
+        ChartscpResult month_whole_year = new ChartscpUtils.Builder(ChartscpUtils.MONTH_WHOLE_YEAR).build();
+
+        /**
+         * 显示当前周数据
+         */
+        Calendar instance = Calendar.getInstance();
+        instance.add(Calendar.DATE,-3);
+        ChartscpResult week = new ChartscpUtils.Builder(ChartscpUtils.WEEK).setDataNonzero(true).build();
+
+        //模拟数据库数据 ChartscpResultMapKz和Kz类字段对应  datas1
+        List<ChartscpResultMap> list2 = new ArrayList<>();
+        ChartscpResultMap crm = new ChartscpResultMap();
+        crm.setXcell("01-27");
+        crm.setData(1);
+        list2.add(crm);
+        //更新数据
+        week.updateData(list2);
         
         
  通过上述方法返回一个ChartscpResult类，这个类中有以下属性

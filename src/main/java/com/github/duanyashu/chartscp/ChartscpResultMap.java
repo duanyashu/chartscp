@@ -5,7 +5,7 @@ package com.github.duanyashu.chartscp;
  * @author: duanyashu
  * @time: 2021-01-19 14:37
  */
-public class ChartscpMap {
+public class ChartscpResultMap {
 
     private String xcell;
 

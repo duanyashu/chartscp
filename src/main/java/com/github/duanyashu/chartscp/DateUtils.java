@@ -8,6 +8,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
+/**
+ * 类描述：时间操作定义类
+ *
+ * @Author: 张代浩
+ * @Date:2012-12-8 12:15:03
+ * @Version 1.0
+ */
 public class DateUtils {
 
     public static final String NORM_DATE_PATTERN = "yyyy-MM-dd";
@@ -88,6 +95,7 @@ public class DateUtils {
         Calendar cal = Calendar.getInstance();
         // --------------------cal.setTimeInMillis(millis);
         cal.setTime(new Date(millis));
+        Date time = cal.getTime();
         return cal;
     }
 
@@ -315,15 +323,11 @@ public class DateUtils {
      * @param arg0
      * @return
      */
-    public static  Calendar strConvertCalendar(String arg0) {
+    public static  Calendar strConvertCalendar(String arg0) throws ParseException {
         Set<Map.Entry<String,String>> entrySet = formatMap.entrySet();
         for (Map.Entry<String, String> entry : entrySet) {
-            if(Pattern.matches(entry.getKey(), arg0)) {
-                try {
-                    return  parseCalendar(arg0, entry.getValue());
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+            if(Pattern.matches(entry.getKey(), arg0.trim())) {
+                return  parseCalendar(arg0, entry.getValue());
             }
         }
 
@@ -335,6 +339,56 @@ public class DateUtils {
     public static int getYear() {
         Calendar calendar = getCalendar();
         return calendar.get(Calendar.YEAR);
+    }
+
+
+
+    public static Calendar getYM() {
+        Calendar calendar = getCalendar();
+        calendar.set(Calendar.MONTH,0);
+        calendar.set(Calendar.DATE,1);
+        calendar.set(Calendar.HOUR,0);
+        calendar.set(Calendar.MINUTE,0);
+        calendar.set(Calendar.SECOND,0);
+        Date time = calendar.getTime();
+        calendar = getCalendar(time.getTime());
+        return calendar;
+    }
+
+    public static Calendar getYMD() {
+        Calendar calendar = getCalendar();
+        calendar.set(Calendar.HOUR,0);
+        calendar.set(Calendar.MINUTE,0);
+        calendar.set(Calendar.SECOND,0);
+        Date time = calendar.getTime();
+        return getCalendar(time.getTime());
+    }
+    public static Calendar getYMDH() {
+        Calendar calendar = getCalendar();
+        calendar.set(Calendar.MINUTE,0);
+        calendar.set(Calendar.SECOND,0);
+        Date time = calendar.getTime();
+        Calendar instance = Calendar.getInstance();
+        instance.setTimeInMillis(time.getTime());
+        return instance;
+    }
+
+    public static Calendar getYMDHM() {
+        Calendar calendar = getCalendar();
+        calendar.set(Calendar.SECOND,0);
+        Date time = calendar.getTime();
+        return getCalendar(time.getTime());
+    }
+    public static int getDayOfWeek(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        if (date!=null){
+            calendar.setTime(date);
+        }
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+        if (dayOfWeek == 0) {
+            dayOfWeek = 7;
+        }
+        return dayOfWeek;
     }
 
 }
