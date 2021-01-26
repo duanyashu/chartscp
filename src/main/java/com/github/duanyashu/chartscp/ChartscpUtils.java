@@ -29,119 +29,6 @@ import java.util.*;
 public class ChartscpUtils<T> {
 
 
-    public static void main(String[] args) throws Exception {
-
-        /**
-         * 年为单位 最近3年
-         */
-        ChartscpResult yearResult = new ChartscpUtils.Builder(ChartscpUtils.YEAR).setLength(3).build();
-        /**
-         * 月为单位  最近5月
-         */
-        ChartscpResult monthResult = new ChartscpUtils.Builder(ChartscpUtils.MONTH).setXCellFormat("yy-M").setLength(5).build();
-        /**
-         * 日为单位 最近7日
-         */
-        ChartscpResult dateResult = new ChartscpUtils.Builder(ChartscpUtils.DATE).setLength(7).build();
-        /**
-         * 小时为单位 最近7小时
-         */
-        ChartscpResult hourResult = new ChartscpUtils.Builder(ChartscpUtils.HOUR).build();
-        /**
-         * 分钟为单位 最近7分钟
-         */
-        ChartscpResult minuteResult = new ChartscpUtils.Builder(ChartscpUtils.MINUTE).build();
-
-        /**
-         * 日为单位 间隔2日统计 3个日单位 (eg: xells={1 3 5}))
-         */
-        ChartscpResult dateIntervalResult = new ChartscpUtils.Builder(ChartscpUtils.DATE).setLength(3).setInterval(2).build();
-        /**
-         * 最近7天非连续数据  间隔为0  只生成开始结束日期，数据直接获取数据库
-         */
-        ChartscpResult dateInterval0Result = new ChartscpUtils.Builder(Calendar.DATE).setInterval(0).build();
-
-        /**
-         * 加开始 ，结束时间  指定日期的数据
-         */
-        ChartscpResult seResult = new ChartscpUtils.Builder(ChartscpUtils.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").build();
-
-        /**
-         * 自定义 显示格式
-         */
-        ChartscpResult customXCellFormat = new ChartscpUtils.Builder(ChartscpUtils.HOUR).setXCellFormat("H点m分").setLength(3).build();
-
-        /**
-         * 自定义扩展类实现字段扩展
-         */
-//        Kz kz = new ChartscpUtils.Builder(ChartscpUtils.DATE).build(Kz.class);
-//        //模拟数据库数据 ChartscpResultMapKz和Kz类字段对应  datas1
-//        List<ChartscpResultMapKz> list = new ArrayList<>();
-//        ChartscpResultMapKz sqKz = new ChartscpResultMapKz();
-//        sqKz.setXcell("01-22");
-//        sqKz.setData(1);
-//        sqKz.setDatas1(3);
-//        list.add(sqKz);
-//        ChartscpResultMapKz sqKz1 = new ChartscpResultMapKz();
-//        sqKz1.setXcell("01-24");
-//        sqKz1.setData(4);
-//        sqKz1.setDatas1(8);
-//        list.add(sqKz1);
-//        //更新数据
-//        kz.updateData(list);
-
-        /**
-         * 按分钟显示整小时
-         */
-        ChartscpResult minute_whole_hour = new ChartscpUtils.Builder(MINUTE_WHOLE_HOUR).setDataNonzero(true).setInterval(8).build();
-        /**
-         * 按分钟显示整小时 ,当前分钟没有数据保持前一分钟数据
-         */
-        ChartscpResult minute_whole_hour1 = new ChartscpUtils.Builder(MINUTE_WHOLE_HOUR).setDataNonzero(true).setEndTime("2021-01-25 08:09:23").build();
-        //模拟数据库数据 ChartscpResultMapKz和Kz类字段对应  datas1
-        List<ChartscpResultMap> list3 = new ArrayList<>();
-        ChartscpResultMap crm1 = new ChartscpResultMap();
-        crm1.setXcell("11:12");
-        crm1.setData(1);
-        list3.add(crm1);
-        //更新数据
-        minute_whole_hour1.updateData(list3);
-        /**
-         * 按小时显示整天  三班倒
-         */
-        ChartscpResult hour_whole_day = new ChartscpUtils.Builder(ChartscpUtils.HOUR_WHOLE_DAY).setInterval(8).setDataNonzero(true).build();
-
-
-        /**
-         * 按天显示整月
-         */
-        ChartscpResult day_whole_month = new ChartscpUtils.Builder(ChartscpUtils.DAY_WHOLE_MONTH).build();
-        /**
-         * 按月显示整年
-         */
-        ChartscpResult month_whole_year = new ChartscpUtils.Builder(ChartscpUtils.MONTH_WHOLE_YEAR).build();
-
-
-        /**
-         * 显示当前周数据
-         */
-        Calendar instance = Calendar.getInstance();
-        instance.add(Calendar.DATE,-3);
-        ChartscpResult week = new ChartscpUtils.Builder(ChartscpUtils.WEEK).setInterval(3).setDataNonzero(true).build();
-
-        //模拟数据库数据 ChartscpResultMapKz和Kz类字段对应  datas1
-        List<ChartscpResultMap> list2 = new ArrayList<>();
-        ChartscpResultMap crm = new ChartscpResultMap();
-        crm.setXcell("01-27");
-        crm.setData(1);
-        list2.add(crm);
-        //更新数据
-        week.updateData(list2);
-
-
-    }
-
-
     private int calendarField;
 
     private java.util.Calendar startTime;
@@ -168,6 +55,7 @@ public class ChartscpUtils<T> {
     public final static int HOUR_WHOLE_DAY = 92;
     public final static int DAY_WHOLE_MONTH = 93;
     public final static int MONTH_WHOLE_YEAR = 94;
+    public final static int QUARTER = 95;
 
 
     //构造方法
@@ -506,6 +394,48 @@ public class ChartscpUtils<T> {
         return (T) chartscpResult;
     }
 
+    /**
+     * 季度
+     * @param chartscpResultSub
+     * @param <T>
+     * @return
+     */
+    private <T> T generatorQuarter(Class<T> chartscpResultSub){
+        initLengthAndInterval();
+        dataNonzero=false;
+        List<String> dates = new ArrayList<>();
+        List<Integer> counts = new ArrayList<>();
+        Calendar calendar = DateUtils.getYM();
+        if (endTime!=null){
+            calendar= endTime;
+        }
+        //((MONTH(C2)-1)/3)+1
+        //获取月
+        int currentMonth = calendar.get(Calendar.MONTH);
+        //获取季度
+        int i1 = (currentMonth/3)+1;
+        //获取季度开始的月
+        int startMonth = (i1 - 1) * 3;
+        //当前月份需要前推几月是开始月份
+        int i2 = ((length - 1) * 3) + (currentMonth-startMonth);
+        calendar.add(Calendar.MONTH,-i2);
+        Date startTime = calendar.getTime();
+        for (int i = 0; i <3*length; i++) {
+            dates.add(DateUtils.formatDate(calendar.getTime(),"MM"));
+            counts.add(0);
+            if (i<3*length-1){
+                calendar.add(Calendar.MONTH,+1);
+            }
+        }
+        Date endTime = calendar.getTime();
+        ChartscpResult  chartscpResult = createChartscpResult(chartscpResultSub, dates, counts, startTime, endTime);
+        chartscpResult.setResultDateFormat(javaDateFormatToMysqlDateFormat("MM"));
+        format(Calendar.MONTH, chartscpResult);
+        chartscpResult.setCalendarField(calendarField);
+        chartscpResult.setxCellFormat(xCellFormat);
+        return (T) chartscpResult;
+    }
+
 
     /**
      * 构建初始化折线图数据
@@ -526,6 +456,9 @@ public class ChartscpUtils<T> {
         }
         if(calendarField==MINUTE_WHOLE_HOUR){
             return  generatorHour(chartscpResultSub);
+        }
+        if(calendarField==QUARTER){
+            return  generatorQuarter(chartscpResultSub);
         }
 
         //设置length的默认值

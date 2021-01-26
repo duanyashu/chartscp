@@ -55,9 +55,6 @@ public class ChartscpResult<T> {
      */
     private T where;
 
-    /**
-     * 标题
-     */
     private String  title;
 
 
@@ -188,6 +185,8 @@ public class ChartscpResult<T> {
         }
     }
 
+
+    private static final String[] cnNum ={"一","二","三","四","五","六","日"};
     /**
      * 设置时间连续数据
      * @param list
@@ -229,8 +228,9 @@ public class ChartscpResult<T> {
             trimScopeData();
         }
         if (calendarField==ChartscpUtils.WEEK){
-            String xCellsPrefix= xCellFormat==null?"星期":xCellFormat;
-            List<String> strings = Arrays.asList(xCellsPrefix+"一", xCellsPrefix+"二", xCellsPrefix+"三", xCellsPrefix+"四", xCellsPrefix+"五", xCellsPrefix+"六", xCellsPrefix+"日");
+            String xCellsPrefix= xCellFormat==null?"星期%s":xCellFormat;
+            List<String> strings = Arrays.asList(formatStr(xCellsPrefix, 1),formatStr(xCellsPrefix, 2), formatStr(xCellsPrefix, 3), formatStr(xCellsPrefix, 4),
+                    formatStr(xCellsPrefix, 5), formatStr(xCellsPrefix, 6), formatStr(xCellsPrefix, 7));
             int a=0;
             for (int i = 0; i < xCells.size(); i++) {
                 int i1 = a % strings.size();
@@ -238,6 +238,40 @@ public class ChartscpResult<T> {
                 a+=interval;
             }
         }
+        if (calendarField==ChartscpUtils.QUARTER){
+            List<String> xCells = new ArrayList<>();
+            List<Integer> datas = new ArrayList<>();
+            String xCellsPrefix= xCellFormat==null?"%s季度":xCellFormat;
+            for (int i = 0; i <this.xCells.size() ; i++) {
+                //转换月为数字
+                int  month = Integer.parseInt((String) this.xCells.get(i)) - 1;
+                //计算月所在季度
+                int i1 = (month/3)+1;
+                //格式化xCell显示内容
+                String quarter = formatStr(xCellsPrefix,i1);
+                //获取年份
+                Calendar calendar = DateUtils.getCalendar(endTime.getTime());
+                calendar.add(Calendar.MONTH,-(this.xCells.size()-i)+1);
+                int year = calendar.get(Calendar.YEAR);
+                if (year<DateUtils.getYear()){
+                    quarter = String.valueOf(year).substring(2)+"年"+quarter;
+                }
+                if (!xCells.contains(quarter)){
+                    xCells.add(quarter);
+                    datas.add(0);
+                }
+                int index = xCells.indexOf(quarter);
+                int i2 = datas.get(index) +  ((Integer) this.datas.get(i)).intValue();
+                datas.set(index,i2);
+
+            }
+            this.xCells = (List<T>) xCells;
+            this.datas= (List<T>) datas;
+        }
+    }
+
+    private String  formatStr(String source,int num) {
+        return  String.format(source,source.contains("%d")? num:cnNum[num-1]);
     }
 
     /**

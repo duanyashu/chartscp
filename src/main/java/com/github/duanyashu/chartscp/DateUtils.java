@@ -1,6 +1,7 @@
 package com.github.duanyashu.chartscp;
 
 
+import java.beans.PropertyEditorSupport;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -15,7 +16,7 @@ import java.util.regex.Pattern;
  * @Date:2012-12-8 12:15:03
  * @Version 1.0
  */
-public class DateUtils {
+public class DateUtils extends PropertyEditorSupport {
 
     public static final String NORM_DATE_PATTERN = "yyyy-MM-dd";
 

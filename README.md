@@ -9,7 +9,7 @@
  	ChartscpResult build = new ChartscpUtils.Builder(ChartscpUtils.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").setLength(7).setInterval(8).setDataNonzero(true).setXCellFormat("HH时").build();
 	
 	参数说明：
-		Builder(ChartscpUtils.HOUR)是指定显示x轴格式，年（YEAR），月(MONTH)，日(DATE)，小时(HOUR)，分钟(MINUTE)，整周(WEEK)，整小时(MINUTE_WHOLE_HOUR)，整天(HOUR_WHOLE_DAY)，整月(DAY_WHOLE_MONTH)，整年(MONTH_WHOLE_YEAR)， 必填
+		Builder(ChartscpUtils.HOUR)是指定显示x轴格式，年（YEAR），月(MONTH)，日(DATE)，小时(HOUR)，分钟(MINUTE)，整周(WEEK)，整小时(MINUTE_WHOLE_HOUR)，整天(HOUR_WHOLE_DAY)，整月(DAY_WHOLE_MONTH)，整年(MONTH_WHOLE_YEAR),季度（QUARTER）， 必填
 	
 		setLength() 这个方法用来指定显示的长度 默认是7 
 			eg: Builder(ChartscpUtils.YEAR).setLength(3) 是显示最近3年 xCells=[2019,2020,2021] ）
@@ -145,7 +145,7 @@
          */
         Calendar instance = Calendar.getInstance();
         instance.add(Calendar.DATE,-3);
-        ChartscpResult week = new ChartscpUtils.Builder(ChartscpUtils.WEEK).setDataNonzero(true).build();
+        ChartscpResult week = new ChartscpUtils.Builder(ChartscpUtils.WEEK).setXCellFormat("周%s").setDataNonzero(true).build();
 
         //模拟数据库数据 ChartscpResultMapKz和Kz类字段对应  datas1
         List<ChartscpResultMap> list2 = new ArrayList<>();
@@ -155,6 +155,22 @@
         list2.add(crm);
         //更新数据
         week.updateData(list2);
+        
+		 /**
+         * 显示季度数据
+         */
+        ChartscpResult chartscpResult = new ChartscpUtils.Builder(ChartscpUtils.QUARTER).setXCellFormat("第%s个季度").setLength(2).build();
+        //模拟数据库数据 ChartscpResultMapKz和Kz类字段对应  datas1
+        List<ChartscpResultMap> list4 = new ArrayList<>();
+        ChartscpResultMap crm11 = new ChartscpResultMap();
+        crm11.setXcell("01");
+        crm11.setData(4);
+        list4.add(crm11);
+        ChartscpResultMap crm111 = new ChartscpResultMap();
+        crm111.setXcell("03");
+        crm111.setData(2);
+        list4.add(crm111);
+        chartscpResult.updateData(list4);
         
         
  通过上述方法返回一个ChartscpResult类，这个类中有以下属性
