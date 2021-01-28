@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @description: 数据结果集
@@ -199,7 +200,7 @@ public class ChartscpResult<T> {
         for (ChartscpResultMap chartscpMap : list) {
             int index = xCells.indexOf(chartscpMap.getXcell());
             if (index!=-1) {
-                Integer data = chartscpMap.getData();
+                Object data = chartscpMap.getData();
                 if (setData(index, datas, data, first)){
                     trimScopeData();
                 }
@@ -229,26 +230,24 @@ public class ChartscpResult<T> {
         }
         if (calendarField==ChartscpUtils.WEEK){
             String xCellsPrefix= xCellFormat==null?"星期%s":xCellFormat;
-            List<String> strings = Arrays.asList(formatStr(xCellsPrefix, 1),formatStr(xCellsPrefix, 2), formatStr(xCellsPrefix, 3), formatStr(xCellsPrefix, 4),
-                    formatStr(xCellsPrefix, 5), formatStr(xCellsPrefix, 6), formatStr(xCellsPrefix, 7));
+            List<String> strings = Arrays.asList(formatStr(xCellFormat, 1),formatStr(xCellFormat, 2), formatStr(xCellFormat, 3), formatStr(xCellFormat, 4),
+                    formatStr(xCellFormat, 5), formatStr(xCellFormat, 6), formatStr(xCellFormat, 7));
             int a=0;
             for (int i = 0; i < xCells.size(); i++) {
                 int i1 = a % strings.size();
                 xCells.set(i, (T) strings.get(i1));
                 a+=interval;
             }
-        }
-        if (calendarField==ChartscpUtils.QUARTER){
+        }else if (calendarField==ChartscpUtils.QUARTER){
             List<String> xCells = new ArrayList<>();
             List<Integer> datas = new ArrayList<>();
-            String xCellsPrefix= xCellFormat==null?"%s季度":xCellFormat;
             for (int i = 0; i <this.xCells.size() ; i++) {
                 //转换月为数字
-                int  month = Integer.parseInt((String) this.xCells.get(i)) - 1;
+                int  month = Integer.parseInt(this.xCells.get(i).toString().substring(5)) - 1;
                 //计算月所在季度
                 int i1 = (month/3)+1;
                 //格式化xCell显示内容
-                String quarter = formatStr(xCellsPrefix,i1);
+                String quarter = formatStr(xCellFormat,i1);
                 //获取年份
                 Calendar calendar = DateUtils.getCalendar(endTime.getTime());
                 calendar.add(Calendar.MONTH,-(this.xCells.size()-i)+1);
@@ -267,6 +266,8 @@ public class ChartscpResult<T> {
             }
             this.xCells = (List<T>) xCells;
             this.datas= (List<T>) datas;
+        }else{
+            xCells= xCells.stream().map(item->item= (T) DateUtils.dateformat(item.toString(),xCellFormat)).collect(Collectors.toList());
         }
     }
 

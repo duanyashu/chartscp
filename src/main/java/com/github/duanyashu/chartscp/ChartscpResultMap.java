@@ -9,7 +9,7 @@ public class ChartscpResultMap {
 
     private String xcell;
 
-    private Integer data;
+    private Object data;
 
     public String getXcell() {
         return xcell;
@@ -19,7 +19,7 @@ public class ChartscpResultMap {
         this.xcell = xcell;
     }
 
-    public Integer getData() {
+    public Object getData() {
         return data;
     }
 

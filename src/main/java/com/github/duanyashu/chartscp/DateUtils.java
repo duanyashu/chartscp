@@ -69,10 +69,17 @@ public class DateUtils extends PropertyEditorSupport {
         formatMap.put("^\\d{4}\\d{1,2}\\d{1,2}\\d{1,2}\\d{1,2}\\d{1,2}$", "yyyyMMddHHmmss");
         formatMap.put("^\\d{4}\\d{1,2}\\d{1,2}\\d{1,2}\\d{1,2}$", "yyyyMMddHHmm");
         formatMap.put("^\\d{4}-\\d{1,2}-\\d{1,2}$", "yyyy-MM-dd");
+        formatMap.put("^\\d{4}-\\d{1,2}$", "yyyy-MM");
+        formatMap.put("^\\d{1,2}-\\d{1,2}$", "MM-dd");
+        formatMap.put("^\\d{1,2}$", "MM");
+        formatMap.put("^\\d{4}$", "yyyy");
+        formatMap.put("^\\d{4}-\\d{1,2}-\\d{1,2} \\d{1,2}:\\d{1,2}$", "yyyy-MM-dd HH:mm");
+        formatMap.put("^\\d{4}-\\d{1,2}-\\d{1,2} \\d{1,2}$", "yyyy-MM-dd HH");
         formatMap.put("^\\d{4}/\\d{1,2}/\\d{1,2}$", "yyyy/MM/dd");
         formatMap.put("^\\d{4}年\\d{1,2}月\\d{1,2}日$", "yyyy年MM月dd日");
         formatMap.put("^\\d{4}\\d{1,2}\\d{1,2}$", "yyyyMMdd");
         formatMap.put("^\\d{1,2}:\\d{1,2}$", "HH:mm");
+        formatMap.put("^\\d{1,2}$", "HH");
     }
 
 
@@ -119,15 +126,13 @@ public class DateUtils extends PropertyEditorSupport {
      * @return
      */
     public static String dateformat(String date, String format) {
-        SimpleDateFormat sformat = new SimpleDateFormat(format);
-        Date _date = null;
         try {
-            _date = sformat.parse(date);
+            Calendar calendar = DateUtils.strConvertCalendar(date);
+            return formatDate(calendar.getTime(),format);
         } catch (ParseException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return sformat.format(_date);
+        return null;
     }
 
     /**

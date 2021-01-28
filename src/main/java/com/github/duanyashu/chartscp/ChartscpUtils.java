@@ -219,7 +219,7 @@ public class ChartscpUtils<T> {
      */
     private <T> T generatorWeek(Class<T> chartscpResultSub){
         initLengthAndInterval();
-        String format = getFormat(Calendar.DATE);
+        String format = getFormat(calendarField);
         List<String> dates = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
         Calendar calendar = endTime==null ? Calendar.getInstance():DateUtils.getCalendar(endTime.getTimeInMillis());
@@ -252,7 +252,7 @@ public class ChartscpUtils<T> {
     }
     private <T> T generatorMonth(Class<T> chartscpResultSub){
         initLengthAndInterval();
-        String format = getFormat(Calendar.DATE);
+        String format = getFormat(calendarField);
         List<String> dates = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
         Calendar calendar = DateUtils.getYMD();
@@ -290,7 +290,7 @@ public class ChartscpUtils<T> {
 
     private <T> T generatorYear(Class<T> chartscpResultSub){
         initLengthAndInterval();
-        String format = getFormat(Calendar.MONTH);
+        String format = getFormat(calendarField);
         List<String> dates = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
         Calendar calendar = DateUtils.getYM();
@@ -325,7 +325,7 @@ public class ChartscpUtils<T> {
     }
     private <T> T generatorDay(Class<T> chartscpResultSub){
         initLengthAndInterval();
-        String format = getFormat(Calendar.HOUR);
+        String format = getFormat(calendarField);
         List<String> dates = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
         Calendar calendar = DateUtils.getYMDH();
@@ -360,7 +360,7 @@ public class ChartscpUtils<T> {
     }
     private <T> T generatorHour(Class<T> chartscpResultSub){
         initLengthAndInterval();
-        String format = getFormat(Calendar.MINUTE);
+        String format = getFormat(calendarField);
         List<String> dates = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
         Calendar calendar = DateUtils.getYMDHM();
@@ -402,6 +402,7 @@ public class ChartscpUtils<T> {
      */
     private <T> T generatorQuarter(Class<T> chartscpResultSub){
         initLengthAndInterval();
+        String format = getFormat(calendarField);
         dataNonzero=false;
         List<String> dates = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
@@ -421,7 +422,7 @@ public class ChartscpUtils<T> {
         calendar.add(Calendar.MONTH,-i2);
         Date startTime = calendar.getTime();
         for (int i = 0; i <3*length; i++) {
-            dates.add(DateUtils.formatDate(calendar.getTime(),"MM"));
+            dates.add(DateUtils.formatDate(calendar.getTime(),format));
             counts.add(0);
             if (i<3*length-1){
                 calendar.add(Calendar.MONTH,+1);
@@ -429,7 +430,7 @@ public class ChartscpUtils<T> {
         }
         Date endTime = calendar.getTime();
         ChartscpResult  chartscpResult = createChartscpResult(chartscpResultSub, dates, counts, startTime, endTime);
-        chartscpResult.setResultDateFormat(javaDateFormatToMysqlDateFormat("MM"));
+        chartscpResult.setResultDateFormat(javaDateFormatToMysqlDateFormat(format));
         format(Calendar.MONTH, chartscpResult);
         chartscpResult.setCalendarField(calendarField);
         chartscpResult.setxCellFormat(xCellFormat);
@@ -543,32 +544,66 @@ public class ChartscpUtils<T> {
 
 
     private String getFormat(int field) {
-        if (containsDateFormat(xCellFormat,"yy","M","d","H","m","s")){
-            return xCellFormat;
-        }
+      /* if (containsDateFormat(xCellFormat,"yy","M","d","H","m","s")){
+           return xCellFormat;
+       }*/
         String format;
+        String xCellFmt;
         switch (field){
             case Calendar.MINUTE:
-                format="HH:mm";
+                xCellFmt="HH:mm";
+                format= length>60?"yyyy-MM-dd HH:mm":xCellFmt;
+                break;
+            case ChartscpUtils.MINUTE_WHOLE_HOUR:
+                xCellFmt="HH:mm";
+                format= length>1?"yyyy-MM-dd HH:mm":xCellFmt;
                 break;
             case Calendar.HOUR:
-                format="HH";
+                xCellFmt="HH";
+                format= length>24?"yyyy-MM-dd HH":xCellFmt;
+                break;
+            case ChartscpUtils.HOUR_WHOLE_DAY:
+                xCellFmt="HH";
+                format= length>1?"yyyy-MM-dd HH":xCellFmt;
                 break;
             case Calendar.DATE:
-                format="MM-dd";
+                xCellFmt="MM-dd";
+                format= length>30?"yyyy-MM-dd":xCellFmt;
+                break;
+            case ChartscpUtils.DAY_WHOLE_MONTH:
+                xCellFmt="MM-dd";
+                format= length>1?"yyyy-MM-dd":xCellFmt;
                 break;
             case Calendar.MONTH:
-                format="MM";
+                xCellFmt="MM";
+                format= length>12?"yyyy-MM":xCellFmt;
+                break;
+            case ChartscpUtils.MONTH_WHOLE_YEAR:
+                xCellFmt="MM";
+                format= length>1?"yyyy-MM":xCellFmt;
                 break;
             case Calendar.YEAR:
                 format="yyyy";
+                xCellFmt="yyyy";
                 break;
             case Calendar.SECOND:
-                format="HH:mm:ss";
+                xCellFmt="HH:mm:ss";
+                format= length>60?"yyyy-MM-dd HH:mm:ss":xCellFmt;
+                break;
+            case ChartscpUtils.WEEK:
+                format= "yyyy-MM-dd";
+                xCellFmt="星期%s";
+                break;
+            case ChartscpUtils.QUARTER:
+                format="yyyy-MM";;
+                xCellFmt="%s季度";
                 break;
             default:
-                format="yyyy-MM-dd HH:mm:ss";
+                xCellFmt = format="yyyy-MM-dd HH:mm:ss";
                 break;
+        }
+        if (!containsDateFormat(xCellFormat,"yy","M","d","H","m","s","%d","%s")){
+            xCellFormat=xCellFmt;
         }
         return  format;
     }
