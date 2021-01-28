@@ -271,7 +271,10 @@ public class ChartscpResult<T> {
     }
 
     private String  formatStr(String source,int num) {
-        return  String.format(source,source.contains("%d")? num:cnNum[num-1]);
+        if (!source.contains("%")){
+            return source+cnNum[num-1];
+        }
+        return String.format(source, source.contains("%d") ? num : cnNum[num - 1]);
     }
 
     /**
