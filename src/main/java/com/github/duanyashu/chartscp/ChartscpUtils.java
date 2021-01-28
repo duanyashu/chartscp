@@ -583,8 +583,7 @@ public class ChartscpUtils<T> {
                 format= length>1?"yyyy-MM":xCellFmt;
                 break;
             case Calendar.YEAR:
-                format="yyyy";
-                xCellFmt="yyyy";
+                xCellFmt = format = "yyyy";
                 break;
             case Calendar.SECOND:
                 xCellFmt="HH:mm:ss";
