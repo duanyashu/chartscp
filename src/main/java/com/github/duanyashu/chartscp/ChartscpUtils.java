@@ -575,12 +575,8 @@ public class ChartscpUtils<T> {
                 format= length>1?"yyyy-MM-dd":xCellFmt;
                 break;
             case Calendar.MONTH:
-                xCellFmt="MM";
-                format= length>12?"yyyy-MM":xCellFmt;
-                break;
             case ChartscpUtils.MONTH_WHOLE_YEAR:
-                xCellFmt="MM";
-                format= length>1?"yyyy-MM":xCellFmt;
+                xCellFmt = format="yyyy-MM";
                 break;
             case Calendar.YEAR:
                 xCellFmt = format = "yyyy";

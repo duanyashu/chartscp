@@ -71,7 +71,6 @@ public class DateUtils extends PropertyEditorSupport {
         formatMap.put("^\\d{4}-\\d{1,2}-\\d{1,2}$", "yyyy-MM-dd");
         formatMap.put("^\\d{4}-\\d{1,2}$", "yyyy-MM");
         formatMap.put("^\\d{1,2}-\\d{1,2}$", "MM-dd");
-        formatMap.put("^\\d{1,2}$", "MM");
         formatMap.put("^\\d{4}$", "yyyy");
         formatMap.put("^\\d{4}-\\d{1,2}-\\d{1,2} \\d{1,2}:\\d{1,2}$", "yyyy-MM-dd HH:mm");
         formatMap.put("^\\d{4}-\\d{1,2}-\\d{1,2} \\d{1,2}$", "yyyy-MM-dd HH");
