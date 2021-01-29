@@ -1,8 +1,16 @@
-# 图表折线图的好伴侣,快速生成数据
 
->开源协议： Apache License Version 2.0
- 
- 本工具可以通过指定参数生成图表曲线图,柱状图的初始数据，配合sql实现展示数据
+# 简单生成图表折线图的好伴侣chartscp
+
+这个工具可以通过指定参数生成带日期时间的图表,柱状图的初始数据，配合sql实现展示数据
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210129094902578.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ZlbmdqdXhpYQ==,size_16,color_FFFFFF,t_70#pic_center)
+		  maven仓库坐标
+		  
+		  		<dependency>
+		            <groupId>com.github.duanyashu</groupId>
+		            <artifactId>chartscp</artifactId>
+		            <version>1.0.2</version>
+		        </dependency>
+
  
  ### 使用格式
  
@@ -45,6 +53,10 @@
          * 年为单位 最近3年
          */
         ChartscpResult yearResult = new ChartscpUtils.Builder(ChartscpUtils.YEAR).setLength(3).build();
+ ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210129101239770.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ZlbmdqdXhpYQ==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210129095043792.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ZlbmdqdXhpYQ==,size_16,color_FFFFFF,t_70#pic_center)
+     
+        
         /**
          * 月为单位  最近5月
          */
@@ -141,13 +153,10 @@
         ChartscpResult month_whole_year = new ChartscpUtils.Builder(ChartscpUtils.MONTH_WHOLE_YEAR).build();
 
         /**
-         * 显示当前周数据
+         * 显示当前周数据  如果有多个分类数据，可以通过扩展ChartscpResult和ChartscpResultMap实现
          */
-        Calendar instance = Calendar.getInstance();
-        instance.add(Calendar.DATE,-3);
         ChartscpResult week = new ChartscpUtils.Builder(ChartscpUtils.WEEK).setXCellFormat("周%s").setDataNonzero(true).build();
-
-        //模拟数据库数据 ChartscpResultMapKz和Kz类字段对应  datas1
+            //模拟数据库数据 ChartscpResultMapKz和Kz类字段对应  datas1
         List<ChartscpResultMap> list2 = new ArrayList<>();
         ChartscpResultMap crm = new ChartscpResultMap();
         crm.setXcell("01-27");
@@ -156,6 +165,9 @@
         //更新数据
         week.updateData(list2);
         
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2021012909531341.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ZlbmdqdXhpYQ==,size_16,color_FFFFFF,t_70#pic_center)
+		 
 		 /**
          * 显示季度数据
          */
@@ -172,6 +184,47 @@
         list4.add(crm111);
         chartscpResult.updateData(list4);
         
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210129095735886.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ZlbmdqdXhpYQ==,size_16,color_FFFFFF,t_70#pic_center)
+针对下边这种带分类的统计可以通过带条件分类（广告收入等）进行多次查询 然后合并数据方式
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210129095938682.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ZlbmdqdXhpYQ==,size_16,color_FFFFFF,t_70#pic_center)
+
+	public Map<String, Object> quarter() {
+	        List<String> legend = Arrays.asList("上季度","本季度");
+	        List<Object> data1 =  new ArrayList<>();
+	        List<Object> data2 =  new ArrayList<>();
+	        List<String> yCell = new ArrayList<>();
+	        List<String> sourceList = Arrays.asList("广告收入，房扭扭收入，置顶收入，明星楼盘");
+	        for (String source : sourceList) {
+	            yCell.add(source);
+	            ChartscpResult resultVo = new ChartscpUtils.Builder(ChartscpUtils.QUARTER).setLength(2).build();
+	            //设置条件
+	            resultVo.setWhere(source);
+	            //执行查询sql
+	            List<ChartscpResultMap> chartscpResultMaps = xxxMapper.select(resultVo);
+	            resultVo.updateData(chartscpResultMaps);
+	            List datas = resultVo.getDatas();
+	            data1.add(datas.get(0));
+	            data2.add(datas.get(1));
+	        }
+	
+	        Map<String, Object> map  = new HashMap<>();
+	        map.put("legend",legend);
+	        map.put("yCell",yCell);
+	        map.put("data1",data1);
+	        map.put("data2",data2);
+	        return map;
+	    }
+	    
+ sql语句
+ 
+     <select id="select" parameterType="com.github.duanyashu.chartscp.ChartscpResult" resultType="com.github.duanyashu.chartscp.ChartscpResultMap">
+         select DATE_FORMAT(create_time,#{resultDateFormat}) as xcell ,sum('字段') as data FROM 表名
+        where create_time BETWEEN #{startTime} and #{endTime}  and type='1' and is_success='1'
+        <if test="where!=null and where!=''">
+            and souce=#{where}
+        </if>
+      GROUP BY DATE_FORMAT(create_time,#{groupByDateFormat}) ORDER BY create_time
+    </select>
         
  通过上述方法返回一个ChartscpResult类，这个类中有以下属性
         
@@ -217,7 +270,8 @@
 
     List<EchartsMap> selectUserByOneWeek(ChartscpResult chartscpResult);
     
- #### mapper.xml
+ #### mapper.xml  
+ sql语句除了数据有间隔使用第二个sql，其他情况都使用以下sql
  
        <select id="selectUserByOneWeek" resultType="util.ChartscpMap">    
             select DATE_FORMAT(create_time,#{resultDateFormat}) as xcell ,count(*) as data1 FROM user
