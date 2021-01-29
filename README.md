@@ -5,11 +5,11 @@
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210129094902578.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ZlbmdqdXhpYQ==,size_16,color_FFFFFF,t_70#pic_center)
 		  maven仓库坐标
 		  
-		  		<dependency>
-		            <groupId>com.github.duanyashu</groupId>
-		            <artifactId>chartscp</artifactId>
-		            <version>1.0.2</version>
-		        </dependency>
+		  <dependency>
+			  <groupId>com.github.duanyashu</groupId>
+			  <artifactId>chartscp</artifactId>
+			  <version>1.0.2</version>
+		  </dependency>
 
  
  ### 使用格式
