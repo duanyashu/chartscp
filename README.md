@@ -220,7 +220,7 @@
  
      <select id="select" parameterType="com.github.duanyashu.chartscp.ChartscpResult" resultType="com.github.duanyashu.chartscp.ChartscpResultMap">
          select DATE_FORMAT(create_time,#{resultDateFormat}) as xcell ,sum('字段') as data FROM 表名
-        where create_time BETWEEN #{startTime} and #{endTime}  and type='1' and is_success='1'
+        where create_time BETWEEN #{startTime} and #{endTime}
         <if test="where!=null and where!=''">
             and souce=#{where}
         </if>
