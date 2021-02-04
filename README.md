@@ -18,7 +18,7 @@ maven仓库坐标
  	ChartscpResult build = new ChartscpUtils.Builder(ChartscpUtils.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").setLength(7).setInterval(8).setDataNonzero(true).setXCellFormat("HH时").build();
 	
 	参数说明：
-		Builder(ChartscpUtils.HOUR)是指定显示x轴格式，年（YEAR），月(MONTH)，日(DATE)，小时(HOUR)，分钟(MINUTE)，整周(WEEK)，整小时(MINUTE_WHOLE_HOUR)，整天(HOUR_WHOLE_DAY)，整月(DAY_WHOLE_MONTH)，整年(MONTH_WHOLE_YEAR),季度（QUARTER）， 必填
+		Builder(ChartscpUtils.HOUR)是指定显示x轴格式，年（YEAR），月(MONTH)，日(DATE)，小时(HOUR)，分钟(MINUTE)，周(WEEK)，整周(DAY_WHOLE_WEEK)，整小时(MINUTE_WHOLE_HOUR)，整天(HOUR_WHOLE_DAY)，整月(DAY_WHOLE_MONTH)，整年(MONTH_WHOLE_YEAR),季度（QUARTER）， 必填
 	
 		setLength() 这个方法用来指定显示的长度 默认是7 
 			eg: Builder(ChartscpUtils.YEAR).setLength(3) 是显示最近3年 xCells=[2019,2020,2021] ）
@@ -156,7 +156,7 @@ maven仓库坐标
         /**
          * 显示当前周数据  如果有多个分类数据，可以通过扩展ChartscpResult和ChartscpResultMap实现
          */
-        ChartscpResult week = new ChartscpUtils.Builder(ChartscpUtils.WEEK).setXCellFormat("周%s").setDataNonzero(true).build();
+        ChartscpResult dayWholeWeek = new ChartscpUtils.Builder(ChartscpUtils.DAY_WHOLE_WEEK).setXCellFormat("周%s").setDataNonzero(true).build();
             //模拟数据库数据 ChartscpResultMapKz和Kz类字段对应  datas1
         List<ChartscpResultMap> list2 = new ArrayList<>();
         ChartscpResultMap crm = new ChartscpResultMap();
@@ -164,7 +164,13 @@ maven仓库坐标
         crm.setData(1);
         list2.add(crm);
         //更新数据
-        week.updateData(list2);
+        dayWholeWeek.updateData(list2);
+        
+        /**
+         * 显示以周为单位的数据 默认显示最近4周
+         */
+        ChartscpResult week = new ChartscpUtils.Builder(ChartscpUtils.WEEK).build();
+        
         
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/2021012909531341.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ZlbmdqdXhpYQ==,size_16,color_FFFFFF,t_70#pic_center)
