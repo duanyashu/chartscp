@@ -7,20 +7,7 @@ import java.text.ParseException;
 import java.util.*;
 
 /**
- *eg : 默认查询7条数据 通过setLength指定   默认数据间隔1 通过setInterval指定
- *      //当天三班倒数据
- *      ChartscpResult build = new ChartscpUtils.Builder(Calendar.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").setInterval(8).build();
- *      //最近7小时数据
- *      ChartscpResult build2 = new ChartscpUtils.Builder(Calendar.HOUR).build();
- *      //最近7小时非连续数据（只显示数据库有的数据）
- *      ChartscpResult build21 = new ChartscpUtils.Builder(Calendar.HOUR).setInterval(0).build();
- *      //最近7年
- *      ChartscpResult build5 = new ChartscpUtils.Builder(Calendar.YEAR).build();
- *      //最近7个月
- *      ChartscpResult build4 = new ChartscpUtils.Builder(Calendar.MONTH).build();
- *      //最近7天
- *      ChartscpResult build4 = new ChartscpUtils.Builder(Calendar.DATE).build();
- *
+
  *
  * @description: 实现初始化参数工具类
  * @author: duanyashu
@@ -31,7 +18,7 @@ public class ChartscpUtils<T> {
 
     private int calendarField;
 
-    private java.util.Calendar startTime;
+    private Calendar startTime;
 
     private Calendar endTime;
 
@@ -49,8 +36,9 @@ public class ChartscpUtils<T> {
     public final static int HOUR = 10;
     public final static int MINUTE = 12;
     public final static int SECOND = 13;
-    public final static int WEEK = 90;
+    public final static int WEEK = 96;
 
+    public final static int DAY_WHOLE_WEEK = 90;
     public final static int MINUTE_WHOLE_HOUR = 91;
     public final static int HOUR_WHOLE_DAY = 92;
     public final static int DAY_WHOLE_MONTH = 93;
@@ -162,7 +150,7 @@ public class ChartscpUtils<T> {
          * @return
          */
         public Builder setXCellFormat(String xCellFormat) {
-            this.xCellFormat = xCellFormat.trim();
+            this.xCellFormat =xCellFormat==null? null: xCellFormat.trim();
             return this;
         }
 
@@ -209,16 +197,16 @@ public class ChartscpUtils<T> {
     }
 
 
-    private void initLengthAndInterval() {
-        length = length == 0 ? 1 : length;
+    private void initLengthAndInterval(int defaultLength) {
+        length = length == 0 ? defaultLength : length;
     }
     /**
      * 周数据
      * @param <T>
      * @return
      */
-    private <T> T generatorWeek(Class<T> chartscpResultSub){
-        initLengthAndInterval();
+    private <T> T generatorDayWholeWeek(Class<T> chartscpResultSub){
+        initLengthAndInterval(1);
         String format = getFormat(calendarField);
         List<String> dates = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
@@ -250,8 +238,49 @@ public class ChartscpUtils<T> {
         chartscpResult.setxCellFormat(xCellFormat);
         return (T) chartscpResult;
     }
+    /**
+     * 周为单位数据
+     * @param <T>
+     * @return
+     */
+    private <T> T generatorWeek(Class<T> chartscpResultSub){
+        initLengthAndInterval(4);
+        String format = getFormat(calendarField);
+        dataNonzero=false;
+        List<String> dates = new ArrayList<>();
+        List<Integer> counts = new ArrayList<>();
+        Calendar calendar = DateUtils.getYMD();
+        if (endTime!=null){
+            calendar= endTime;
+        }
+        //设置星期一为一周开始的第一天
+        calendar.setFirstDayOfWeek(Calendar.MONDAY);
+        // 获得当前日期是一个星期的第几天
+        int dayWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        if(dayWeek==1){
+            dayWeek = 8;
+        }
+        calendar.add(Calendar.DATE, calendar.getFirstDayOfWeek() - dayWeek);// 根据日历的规则，给当前日期减去星期几与一个星期第一天的差值
+        Date time = calendar.getTime();
+        calendar.add(Calendar.DATE,-(length-1)*7);
+        Date startTime = calendar.getTime();
+        for (int i = 0; i <7*length; i++) {
+            dates.add(DateUtils.formatDate(calendar.getTime(),format));
+            counts.add(0);
+            if (i<7*length-1){
+                calendar.add(Calendar.DATE,+1);
+            }
+        }
+        Date endTime = calendar.getTime();
+        ChartscpResult  chartscpResult = createChartscpResult(chartscpResultSub, dates, counts, startTime, endTime);
+        chartscpResult.setResultDateFormat(javaDateFormatToMysqlDateFormat(format));
+        format(Calendar.DATE, chartscpResult);
+        chartscpResult.setCalendarField(calendarField);
+        chartscpResult.setxCellFormat(xCellFormat);
+        return (T) chartscpResult;
+    }
     private <T> T generatorMonth(Class<T> chartscpResultSub){
-        initLengthAndInterval();
+        initLengthAndInterval(1);
         String format = getFormat(calendarField);
         List<String> dates = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
@@ -289,7 +318,7 @@ public class ChartscpUtils<T> {
 
 
     private <T> T generatorYear(Class<T> chartscpResultSub){
-        initLengthAndInterval();
+        initLengthAndInterval(1);
         String format = getFormat(calendarField);
         List<String> dates = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
@@ -324,7 +353,7 @@ public class ChartscpUtils<T> {
         return (T) chartscpResult;
     }
     private <T> T generatorDay(Class<T> chartscpResultSub){
-        initLengthAndInterval();
+        initLengthAndInterval(1);
         String format = getFormat(calendarField);
         List<String> dates = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
@@ -359,7 +388,7 @@ public class ChartscpUtils<T> {
         return (T) chartscpResult;
     }
     private <T> T generatorHour(Class<T> chartscpResultSub){
-        initLengthAndInterval();
+        initLengthAndInterval(1);
         String format = getFormat(calendarField);
         List<String> dates = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
@@ -401,7 +430,7 @@ public class ChartscpUtils<T> {
      * @return
      */
     private <T> T generatorQuarter(Class<T> chartscpResultSub){
-        initLengthAndInterval();
+        initLengthAndInterval(1);
         String format = getFormat(calendarField);
         dataNonzero=false;
         List<String> dates = new ArrayList<>();
@@ -445,6 +474,9 @@ public class ChartscpUtils<T> {
     private <T> T generatorData(Class<T> chartscpResultSub) {
         if(calendarField==WEEK){
             return  generatorWeek(chartscpResultSub);
+        }
+        if(calendarField==DAY_WHOLE_WEEK){
+            return  generatorDayWholeWeek(chartscpResultSub);
         }
         if(calendarField==DAY_WHOLE_MONTH){
             return  generatorMonth(chartscpResultSub);
@@ -579,15 +611,20 @@ public class ChartscpUtils<T> {
                 xCellFmt = format="yyyy-MM";
                 break;
             case Calendar.YEAR:
-                xCellFmt = format = "yyyy";
+                format="yyyy";
+                xCellFmt="yyyy";
                 break;
             case Calendar.SECOND:
                 xCellFmt="HH:mm:ss";
                 format= length>60?"yyyy-MM-dd HH:mm:ss":xCellFmt;
                 break;
-            case ChartscpUtils.WEEK:
+            case ChartscpUtils.DAY_WHOLE_WEEK:
                 format= "yyyy-MM-dd";
                 xCellFmt="星期%s";
+                break;
+            case ChartscpUtils.WEEK:
+                format= "yyyy-MM-dd";
+                xCellFmt="第%s周";
                 break;
             case ChartscpUtils.QUARTER:
                 format="yyyy-MM";;

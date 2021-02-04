@@ -11,7 +11,7 @@
     <description>Chart data generation tool </description>
 
     <!-- FIXME change it to the project's website -->
-    <url>http://www.example.com</url>
+    <url>https://gitee.com/duanyashu</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

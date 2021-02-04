@@ -228,8 +228,7 @@ public class ChartscpResult<T> {
             datas.remove(0);
             trimScopeData();
         }
-        if (calendarField==ChartscpUtils.WEEK){
-            String xCellsPrefix= xCellFormat==null?"星期%s":xCellFormat;
+        if (calendarField==ChartscpUtils.DAY_WHOLE_WEEK){
             List<String> strings = Arrays.asList(formatStr(xCellFormat, 1),formatStr(xCellFormat, 2), formatStr(xCellFormat, 3), formatStr(xCellFormat, 4),
                     formatStr(xCellFormat, 5), formatStr(xCellFormat, 6), formatStr(xCellFormat, 7));
             int a=0;
@@ -238,6 +237,27 @@ public class ChartscpResult<T> {
                 xCells.set(i, (T) strings.get(i1));
                 a+=interval;
             }
+        }else if (calendarField==ChartscpUtils.WEEK){
+            List<String> xCells = new ArrayList<>();
+            List<Integer> datas = new ArrayList<>();
+            int j = 1;
+            for (int i = 0; i <this.xCells.size() ; i++) {
+                //格式化xCell显示内容
+                String week = formatStr(xCellFormat,j);
+                if (!xCells.contains(week)){
+                    xCells.add(week);
+                    datas.add(0);
+                }
+                int index = xCells.indexOf(week);
+                int i2 = datas.get(index) +  ((Integer) this.datas.get(i)).intValue();
+                datas.set(index,i2);
+                if (i>0 && i%7==0){
+                    j++;
+                }
+            }
+            this.xCells = (List<T>) xCells;
+            this.datas= (List<T>) datas;
+
         }else if (calendarField==ChartscpUtils.QUARTER){
             List<String> xCells = new ArrayList<>();
             List<Integer> datas = new ArrayList<>();
@@ -287,7 +307,7 @@ public class ChartscpResult<T> {
         //恢复开始日期
         Calendar calendar = DateUtils.getCalendar(startTime.getTime());
         int field = calendarField;
-        if (calendarField == ChartscpUtils.WEEK || calendarField == ChartscpUtils.HOUR_WHOLE_DAY) {
+        if (calendarField == ChartscpUtils.DAY_WHOLE_WEEK || calendarField == ChartscpUtils.HOUR_WHOLE_DAY) {
             field = ChartscpUtils.DATE;
         } else if (calendarField == ChartscpUtils.DAY_WHOLE_MONTH || calendarField == ChartscpUtils.MONTH_WHOLE_YEAR) {
             field = ChartscpUtils.MONTH;
