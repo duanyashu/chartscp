@@ -9,7 +9,7 @@ maven仓库坐标
     <dependency>
         <groupId>com.github.duanyashu</groupId>
         <artifactId>chartscp</artifactId>
-        <version>1.0.2</version>
+        <version>1.1.0</version>
     </dependency>
 
  
