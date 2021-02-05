@@ -6,12 +6,12 @@
 
     <groupId>com.github.duanyashu</groupId>
     <artifactId>chartscp</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.0</version>
     <name>chartscp</name>
     <description>Chart data generation tool </description>
 
     <!-- FIXME change it to the project's website -->
-    <url>https://gitee.com/duanyashu</url>
+    <url>https://gitee.com/duanyashu/chartscp</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
