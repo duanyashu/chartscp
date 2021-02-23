@@ -226,6 +226,25 @@ public class ChartscpResult<T> {
         }
         if (first && dataNonzero){
             datas.remove(0);
+            //处理扩展类
+            if (list.get(0).getClass() != ChartscpResultMap.class) {
+                //获取当前类的扩展类中的属性方法
+                Field[] declaredFields = this.getClass().getDeclaredFields();
+                for (Field declaredField : declaredFields) {
+                    if (declaredField.getType() == List.class) {
+                        try {
+                            Method thisGet = this.getClass().getMethod("get" + getMethodName(declaredField.getName()));
+                            List datasx = (List) thisGet.invoke(this);
+                            datasx.remove(0);
+                            Method thisSet = this.getClass().getMethod("set" + getMethodName(declaredField.getName()),List.class);
+                            thisSet.invoke(this,datasx);
+                        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+            }
             trimScopeData();
         }
         if (calendarField==ChartscpUtils.DAY_WHOLE_WEEK){
@@ -238,6 +257,8 @@ public class ChartscpResult<T> {
                 a+=interval;
             }
         }else if (calendarField==ChartscpUtils.WEEK){
+            //扩展类处理
+            kzClassWeekDataHandler();
             List<String> xCells = new ArrayList<>();
             List<Integer> datas = new ArrayList<>();
             int j = 1;
@@ -259,6 +280,8 @@ public class ChartscpResult<T> {
             this.datas= (List<T>) datas;
 
         }else if (calendarField==ChartscpUtils.QUARTER){
+            //处理扩展类
+            kzClassQuarterDataHandler();
             List<String> xCells = new ArrayList<>();
             List<Integer> datas = new ArrayList<>();
             for (int i = 0; i <this.xCells.size() ; i++) {
@@ -288,6 +311,82 @@ public class ChartscpResult<T> {
             this.datas= (List<T>) datas;
         }else{
             xCells= xCells.stream().map(item->item= (T) DateUtils.dateformat(item.toString(),xCellFormat)).collect(Collectors.toList());
+        }
+    }
+
+    private void kzClassWeekDataHandler(){
+        //获取当前类的扩展类中的属性方法
+        Field[] declaredFields = this.getClass().getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            if (declaredField.getType() == List.class) {
+                try {
+                    List<String> xCells = new ArrayList<>();
+                    List<Integer> datas = new ArrayList<>();
+                    Method thisGet = this.getClass().getMethod("get" + getMethodName(declaredField.getName()));
+                    List datasx = (List) thisGet.invoke(this);
+                    int j = 1;
+                    for (int i = 0; i <this.xCells.size() ; i++) {
+                        //格式化xCell显示内容
+                        String week = formatStr(xCellFormat,j);
+                        if (!xCells.contains(week)){
+                            xCells.add(week);
+                            datas.add(0);
+                        }
+                        int index1 = xCells.indexOf(week);
+                        int i2 = datas.get(index1) +  ((Integer) datasx.get(i)).intValue();
+                        datas.set(index1,i2);
+                        if (i>0 && i%7==0){
+                            j++;
+                        }
+                    }
+                    Method thisSet = this.getClass().getMethod("set" + getMethodName(declaredField.getName()),List.class);
+                    thisSet.invoke(this,datas);
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void kzClassQuarterDataHandler(){
+        //获取当前类的扩展类中的属性方法
+        Field[] declaredFields = this.getClass().getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            if (declaredField.getType() == List.class) {
+                try {
+                    List<String> xCells = new ArrayList<>();
+                    List<Integer> datas = new ArrayList<>();
+                    Method thisGet = this.getClass().getMethod("get" + getMethodName(declaredField.getName()));
+                    List datasx = (List) thisGet.invoke(this);
+                    for (int i = 0; i <this.xCells.size() ; i++) {
+                        //转换月为数字
+                        int  month = Integer.parseInt(this.xCells.get(i).toString().substring(5)) - 1;
+                        //计算月所在季度
+                        int i1 = (month/3)+1;
+                        //格式化xCell显示内容
+                        String quarter = formatStr(xCellFormat,i1);
+                        //获取年份
+                        Calendar calendar = DateUtils.getCalendar(endTime.getTime());
+                        calendar.add(Calendar.MONTH,-(this.xCells.size()-i)+1);
+                        int year = calendar.get(Calendar.YEAR);
+                        if (year<DateUtils.getYear()){
+                            quarter = String.valueOf(year).substring(2)+"年"+quarter;
+                        }
+                        if (!xCells.contains(quarter)){
+                            xCells.add(quarter);
+                            datas.add(0);
+                        }
+                        int index1 = xCells.indexOf(quarter);
+                        int i2 = datas.get(index1) +  ((Integer) datasx.get(i)).intValue();
+                        datas.set(index1,i2);
+
+                    }
+                    Method thisSet = this.getClass().getMethod("set" + getMethodName(declaredField.getName()),List.class);
+                    thisSet.invoke(this,datas);
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
