@@ -7,13 +7,28 @@ import java.text.ParseException;
 import java.util.*;
 
 /**
-
+ *eg : 默认查询7条数据 通过setLength指定   默认数据间隔1 通过setInterval指定
+ *      //当天三班倒数据
+ *      ChartscpResult build = ChartscpUtils.newBuilder(ChartscpUtils.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").setInterval(8).build();
+ *      //最近7小时数据
+ *      ChartscpResult build2 = ChartscpUtils.newBuilder(ChartscpUtils.HOUR).build();
+ *      //最近7小时非连续数据（只显示数据库有的数据）
+ *      ChartscpResult build21 = ChartscpUtils.newBuilder(ChartscpUtils.HOUR).setInterval(0).build();
+ *      //最近7年
+ *      ChartscpResult build5 = ChartscpUtils.newBuilder(ChartscpUtils.YEAR).build();
+ *      //最近7个月
+ *      ChartscpResult build4 = ChartscpUtils.newBuilder(ChartscpUtils.MONTH).build();
+ *      //最近7天
+ *      ChartscpResult build4 = ChartscpUtils.newBuilder(ChartscpUtils.DATE).build();
+ *
  *
  * @description: 实现初始化参数工具类
  * @author: duanyashu
  * @time: 2021-01-15 16:54
  */
 public class ChartscpUtils<T> {
+
+
 
 
     private int calendarField;
@@ -30,19 +45,61 @@ public class ChartscpUtils<T> {
     private String xCellFormat;
 
 
+    /**
+     * 单位： 年
+     */
     public final static int YEAR = 1;
+    /**
+     * 单位：月
+     */
     public final static int MONTH = 2;
+    /**
+     * 单位： 日
+     */
     public final static int DATE = 5;
+    /**
+     * 单位：小时
+     */
     public final static int HOUR = 10;
+    /**
+     * 单位：分钟
+     */
     public final static int MINUTE = 12;
+    /**
+     * 单位：秒
+     */
     public final static int SECOND = 13;
+    /**
+     * 单位：周
+     */
     public final static int WEEK = 96;
 
+    /**
+     * 单位：一周的每一天
+     */
     public final static int DAY_WHOLE_WEEK = 90;
+    /**
+     * 单位：一小时的每分钟
+     */
+
     public final static int MINUTE_WHOLE_HOUR = 91;
+    /**
+     * 单位：一天的每小时
+     */
+
     public final static int HOUR_WHOLE_DAY = 92;
+    /**
+     * 单位：一月的每天
+     */
+
     public final static int DAY_WHOLE_MONTH = 93;
+    /**
+     * 单位：一年的每个月
+     */
     public final static int MONTH_WHOLE_YEAR = 94;
+    /**
+     * 单位：季度
+     */
     public final static int QUARTER = 95;
 
 
@@ -60,6 +117,10 @@ public class ChartscpUtils<T> {
         this.dataNonzero= builder.dataNonzero;
         this.xCellFormat=builder.xCellFormat;
 
+    }
+
+    public static Builder newBuilder(int calendarField) {
+        return  new Builder(calendarField);
     }
 
     /**
@@ -82,16 +143,12 @@ public class ChartscpUtils<T> {
         private  String xCellFormat;
 
         private Class <? extends ChartscpResult>  chartscpResultSub = ChartscpResult.class;
-        //构造方法
-        private Builder() {
-
-        }
         /**
-         * 显示日期格式  年（Calendar.YEAR） 月（Calendar.MONTH）  日（Calendar.DATE）  时（Calendar.HOUR）  分（Calendar.MINUTE）
+         * 显示日期格式  年（ChartscpUtils.YEAR） 月（ChartscpUtils.MONTH）  日（ChartscpUtils.DATE）  时（ChartscpUtils.HOUR）  分（ChartscpUtils.MINUTE）
          * @param calendarField
          * @return
          */
-        public Builder(int calendarField) {
+        private Builder(int calendarField) {
             this.calendarField = calendarField;
         }
 
