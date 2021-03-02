@@ -11,9 +11,6 @@
         <version>1.1.3</version>
     </dependency>
 
-开源地址
-		[https://github.com/duanyashu/chartscp](https://github.com/duanyashu/chartscp)
-		[https://gitee.com/duanyashu/chartscp](https://gitee.com/duanyashu/chartscp)
  
  ### 使用格式
  
