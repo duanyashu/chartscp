@@ -3,16 +3,37 @@
 
 这个工具可以通过指定参数生成带日期时间的图表,柱状图的初始数据，配合sql实现展示数据
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210129094902578.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ZlbmdqdXhpYQ==,size_16,color_FFFFFF,t_70#pic_center)
-		  maven仓库坐标
+		  
+    maven仓库坐标
 		  
     <dependency>
         <groupId>com.github.duanyashu</groupId>
         <artifactId>chartscp</artifactId>
-        <version>1.1.3</version>
+        <version>1.1.4</version>
     </dependency>
+### 使用方式
 
- 
- ### 使用格式
+    public ChartscpResult getUserByOneWeek() {
+            //创建对象
+            ChartscpResult chartscpResult = ChartscpUtils.newBuilder().setCalendarField(Calendar.DATE).build();
+            //执行sql查询数据
+            List<ChartscpResultMap> list = userMapper.selectUserByOneWeek(chartscpResult);
+            //数据更新
+            chartscpResult.updateData(list);
+            return chartscpResult;
+        }
+
+    查询sql 示例
+     <select id="selectUserByOneWeek" resultType="util.ChartscpMap">    
+                select DATE_FORMAT(create_time,#{resultDateFormat}) as xcell ,count(*) as data FROM user
+                where create_time BETWEEN #{startTime} and #{endTime}
+              GROUP BY DATE_FORMAT(create_time,#{groupByDateFormat}) ORDER BY create_time
+          </select>
+
+
+
+
+ ### 说明文档
  
  	ChartscpResult build = ChartscpUtils.newBuilder(ChartscpUtils.HOUR).setStartTime("2021-01-18 00:00:00").setEndTime("2021-01-18 23:59:59").setLength(7).setInterval(8).setDataNonzero(true).setXCellFormat("HH时").build();
 	
