@@ -23,7 +23,7 @@ public class ChartscpResultMap {
         return data;
     }
 
-    public void setData(Integer data) {
+    public void setData(Object data) {
         this.data = data;
     }
 }
